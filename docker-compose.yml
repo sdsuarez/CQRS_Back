@@ -1,14 +1,6 @@
-version: '3.8'
+version: '3'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile-backend
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-  postgres:
+  write-db:
     image: postgres:latest
     environment:
       POSTGRES_DB: mydb
@@ -16,5 +8,47 @@ services:
       POSTGRES_PASSWORD: mypassword
     ports:
       - "5432:5432"
+    networks:
+      - my-cqrs-network
     volumes:
-      - ./docker/postgres-init:/docker-entrypoint-initdb.d
+      - ./docker/postgres/init-masterdb.sh:/docker-entrypoint-initdb.d/init-masterdb.sh
+    command: ["postgres", "-c", "max_connections=200"]
+
+  read-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: myotherdb
+      POSTGRES_USER: myotheruser
+      POSTGRES_PASSWORD: myotherpassword
+    ports:
+      - "5433:5432"
+    networks:
+      - my-cqrs-network
+    volumes:
+      - ./docker/postgres/init-replicadb.sh:/docker-entrypoint-initdb.d/init-replicadb.sh
+    command: ["postgres", "-c", "max_connections=200"]
+
+  write-service:
+    build:
+      context: .
+      dockerfile: write-service/dockerfile
+    depends_on:
+      - write-db
+    networks:
+      - my-cqrs-network
+    ports:
+      - "8080:8080"
+
+  read-service:
+    build:
+      context: .
+      dockerfile: read-service/dockerfile
+    depends_on:
+      - read-db
+    networks:
+      - my-cqrs-network
+    ports:
+      - "8081:8081"
+
+networks:
+  my-cqrs-network:

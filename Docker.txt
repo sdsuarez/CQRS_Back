@@ -1,16 +1,16 @@
 # Imagen base de Golang
-FROM golang:latest
+#FROM golang:latest
 
 # Directorio de trabajo
-WORKDIR /app
+#WORKDIR /app
 
 # Copiar el código fuente al contenedor
-COPY . .
+#COPY . .
 
-RUN go mod tidy
-RUN go mod download
+#RUN go mod tidy
+#RUN go mod download
 # Compilar la aplicación
-RUN go build -o main .
+#RUN go build -o main .
 
 # Exponer el puerto
 EXPOSE 8080

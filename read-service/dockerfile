@@ -1,0 +1,22 @@
+# Utiliza una imagen base de Golang
+FROM golang:latest
+
+# Establece el directorio de trabajo en el contenedor
+WORKDIR /app
+
+# Copia el código fuente de tu servicio de lectura al contenedor
+COPY read-service/ .
+#COPY internal/read internal/read COPY . .
+#COPY internal/read internal/read
+# Descarga las dependencias si estás utilizando módulos Go
+RUN go mod tidy
+RUN go mod download
+
+# Compila tu servicio de lectura
+RUN go build -o read-service main.go
+
+# Expone el puerto en el que se ejecuta tu servicio
+EXPOSE 8081
+
+# Ejecuta tu servicio de lectura cuando se inicie el contenedor
+CMD ["./read-service"]
