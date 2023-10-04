@@ -6,6 +6,7 @@ import (
     "github.com/gorilla/mux"
     "proyect_modules/controllers"
     "proyect_modules/db"
+    "github.com/rs/cors"
 )
 
 func main() {
@@ -43,8 +44,15 @@ func main() {
     writeGroup.HandleFunc("/attachments/delete/{id}", controllers.DeleteTaskAttachment).Methods("DELETE")
 
 
+    c := cors.New(cors.Options{
+        AllowedOrigins: []string{"*"}, // Esto permite solicitudes desde cualquier origen
+        AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+    })
+
+    // Envolvemos el router en el middleware CORS
+    handler := c.Handler(r)
 
     port := ":8080"
     log.Printf("Servidor en ejecución en el puerto %s", port)
-    log.Fatal(http.ListenAndServe(port, r))
+    log.Fatal(http.ListenAndServe(port, handler))
 }
